@@ -514,6 +514,24 @@ impl<S: io::Read + io::Write> TlsStream<S> {
         Ok(trust.certificate_at_index(0).map(Certificate))
     }
 
+    #[allow(deprecated)]
+    pub fn peer_certificate_chain(&self) -> Result<Option<Vec<Certificate>>, Error> {
+        let trust = match self.stream.context().peer_trust2()? {
+            Some(trust) => trust,
+            None => return Ok(None),
+        };
+        trust.evaluate()?;
+
+        let count = trust.certificate_count();
+        let mut chain = Vec::with_capacity(count);
+        for i in 0..count {
+            if let Some(cert) = trust.certificate_at_index(i) {
+            chain.push(Certificate(cert));
+            }
+        }
+        Ok(Some(chain))
+    }
+
     #[cfg(feature = "alpn")]
     pub fn negotiated_alpn(&self) -> Result<Option<Vec<u8>>, Error> {
         match self.stream.context().alpn_protocols() {

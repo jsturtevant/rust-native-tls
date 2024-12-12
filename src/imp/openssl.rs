@@ -412,6 +412,10 @@ impl<S: io::Read + io::Write> TlsStream<S> {
         Ok(self.0.ssl().peer_certificate().map(Certificate))
     }
 
+    pub fn peer_certificate_chain(&self) -> Result<Option<Vec<Certificate>>, Error> {
+        Ok(self.0.ssl().peer_cert_chain().map(|certs| certs.iter().map(|cert| Certificate(cert.to_owned())).collect()))
+    }
+
     #[cfg(feature = "alpn")]
     pub fn negotiated_alpn(&self) -> Result<Option<Vec<u8>>, Error> {
         Ok(self

@@ -660,6 +660,14 @@ impl<S: io::Read + io::Write> TlsStream<S> {
         Ok(self.0.peer_certificate()?.map(Certificate))
     }
 
+    /// Returns the peer certificate chain
+    ///
+    /// On Linux, the client side chain includes the leaf certificate.  
+    /// On Linux, the server side chain will not include leaf
+    pub fn peer_certificate_chain(&self) -> Result<Option<Vec<Certificate>>> {
+        Ok(self.0.peer_certificate_chain()?.map(|chain| chain.into_iter().map(Certificate).collect()))
+    }
+
     /// Returns the tls-server-end-point channel binding data as defined in [RFC 5929].
     ///
     /// [RFC 5929]: https://tools.ietf.org/html/rfc5929

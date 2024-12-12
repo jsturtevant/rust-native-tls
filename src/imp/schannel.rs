@@ -387,6 +387,13 @@ impl<S: io::Read + io::Write> TlsStream<S> {
         }
     }
 
+    pub fn peer_certificate_chain(&self) -> Result<Option<Vec<Certificate>>, Error> {
+        match self.0.peer_certificate() {
+            Ok(cert) => Ok(cert.cert_store().as_ref().map(|s| s.certs().into_iter().map(|c| Certificate(c)).collect())),
+            _ => Ok(None),
+        }
+    }
+
     #[cfg(feature = "alpn")]
     pub fn negotiated_alpn(&self) -> Result<Option<Vec<u8>>, Error> {
         Ok(self.0.negotiated_application_protocol()?)
